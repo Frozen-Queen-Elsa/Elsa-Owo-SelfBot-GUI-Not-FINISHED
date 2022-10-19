@@ -657,7 +657,7 @@ def create_form(Form):
         if client.CheckRunningAuto:
             client.FlagRunAuto=False  
             client.CheckRunningAuto=False
-            client.startloop=False
+            
             print('Stop Auto')
             btStart.config(state=NORMAL)
 
@@ -1153,9 +1153,9 @@ def create_form(Form):
                 endcommand()
                 #print(f"Logged in as {color.yellow}{user['username']}#{user['discriminator']}{color.reset}")
                 sleep(1)    
-                if client.startloop==False:
-                    client.starttime=time()
-                    loopie()
+        
+                client.starttime=time()
+                loopie()
 
 
         def PmtoOwo(text):
@@ -1414,89 +1414,89 @@ def create_form(Form):
                 if client.casino['channelcasinoid']=='nothing' or client.casino['channelcasinoid']=='':
                     client.casino['channelcasinoid']=client.channel
                     
-            if client.startloop:        
-                if resp.event.message:		
-                    threadcaptcha= threading.Thread(name="captchamusic", target=captchamusic)
-                    m = resp.parsed.auto()     
+                  
+            if resp.event.message:		
+                threadcaptcha= threading.Thread(name="captchamusic", target=captchamusic)
+                m = resp.parsed.auto()     
+                
+                #if m['channel_id'] == client.channel or m['channel_id'] == client.casino['channelcasinoid'] or m['channel_id'] == client.dmsID and not client.stopped:
+                if m['author']['id'] == client.OwOID or m['author']['username'] == 'OwO' or m['author']['discriminator'] == '8456'  and not client.stopped:
                     
-                    #if m['channel_id'] == client.channel or m['channel_id'] == client.casino['channelcasinoid'] or m['channel_id'] == client.dmsID and not client.stopped:
-                    if m['author']['id'] == client.OwOID or m['author']['username'] == 'OwO' or m['author']['discriminator'] == '8456'  and not client.stopped:
-                        
-                        if client.username in m['content'] and 'banned' in m['content'].lower() and not client.stopped:
+                    if client.username in m['content'] and 'banned' in m['content'].lower() and not client.stopped:
+                        command(f'{at()} ','yellow')
+                        command(' !! [CAPTCHA] !! ACTION REQUİRED','red')
+                        endcommand()
+                        client.stopped=True
+                        return "captcha"
+                    if client.username in m['content'] and  any(captcha in m['content'].lower() for captcha in ['(1/5)', '(2/5)', '(3/5)', '(4/5)', '(5/5)']) and not client.stopped:				
+                        msgs=getMessages(channel=client.dmsID)
+                        print(msgs)
+                        if client.username in m['content'] and msgs[0]['author']['id'] == client.OwOID and '⚠'  in msgs[0]['content'] and msgs[0]['attachments'] and not client.stopped:
+                            client.stopped=True
+                            threadcaptcha.start()
                             command(f'{at()} ','yellow')
                             command(' !! [CAPTCHA] !! ACTION REQUİRED','red')
-                            endcommand()
-                            client.stopped=True
+                            endcommand()      
+                            
+                            if checkvip and not client.stopped:
+                                if client.webhook['enable']:
+                                    webhookping()
+                                return solvevip(msgs[0]['attachments'][0]['url'], msgs[0]['content'])
+                            else:
+                                if client.solve['enable'] and not client.stopped:
+                                    return solve(msgs[0]['attachments'][0]['url'], msgs[0]['content'])
                             return "captcha"
-                        if client.username in m['content'] and  any(captcha in m['content'].lower() for captcha in ['(1/5)', '(2/5)', '(3/5)', '(4/5)', '(5/5)']) and not client.stopped:				
-                            msgs=getMessages(channel=client.dmsID)
-                            print(msgs)
-                            if client.username in m['content'] and msgs[0]['author']['id'] == client.OwOID and '⚠'  in msgs[0]['content'] and msgs[0]['attachments'] and not client.stopped:
-                                client.stopped=True
-                                threadcaptcha.start()
-                                command(f'{at()} ','yellow')
-                                command(' !! [CAPTCHA] !! ACTION REQUİRED','red')
-                                endcommand()      
-                                
-                                if checkvip and not client.stopped:
-                                    if client.webhook['enable']:
-                                        webhookping()
-                                    return solvevip(msgs[0]['attachments'][0]['url'], msgs[0]['content'])
-                                else:
-                                    if client.solve['enable'] and not client.stopped:
-                                        return solve(msgs[0]['attachments'][0]['url'], msgs[0]['content'])
-                                return "captcha"
-                            elif msgs[0]['author']['id'] == client.OwOID and 'link' in msgs[0]['content'].lower() and not client.stopped:		
-                                #if client.webhook['enable']:			
-                                    #webhookPing(f"<@{client.webhook['pingid']}> [WARNING]Captcha Link. Wait me. User: {client.username} <@{client.userid}>")
-                                client.stopped=True	                           	
-                                return solvelink()				
-                        
-                            msgs=getMessages(num=10)
-                            for i in range(len(msgs)):
-                                if client.username in m['content'] and  msgs[i]['author']['id'] == client.OwOID and 'solving the captcha' in msgs[i]['content'].lower() and not client.stopped:
-                                    threadcaptcha.start()
-                                    command(f'{at()} ','yellow')
-                                    command(' !! [CAPTCHA] !! ACTION REQUİRED','red')
-                                    endcommand()
-                                    if checkvip and not client.stopped:
-                                        client.stopped=True
-
-                                        return solvevip(msgs[0]['attachments'][0]['url'], msgs[0]['content'])
-                                    else:
-                                        if not client.stopped:
-                                            client.stopped=True
-                                            if client.webhook['enable']:
-                                                webhookping()
-                                            return solve(msgs[0]['attachments'][0]['url'], msgs[0]['content'])
-                                    return "captcha"
-                                else:
-                                    if i == len(msgs) - 1:
-                                        client.stopped=True
-                                        return "captcha"
-                        if client.username in m['content'] and  '⚠' in m['content'].lower() and not client.stopped:
-
-                            if  m['attachments'] and not client.stopped:
+                        elif msgs[0]['author']['id'] == client.OwOID and 'link' in msgs[0]['content'].lower() and not client.stopped:		
+                            #if client.webhook['enable']:			
+                                #webhookPing(f"<@{client.webhook['pingid']}> [WARNING]Captcha Link. Wait me. User: {client.username} <@{client.userid}>")
+                            client.stopped=True	                           	
+                            return solvelink()				
+                    
+                        msgs=getMessages(num=10)
+                        for i in range(len(msgs)):
+                            if client.username in m['content'] and  msgs[i]['author']['id'] == client.OwOID and 'solving the captcha' in msgs[i]['content'].lower() and not client.stopped:
                                 threadcaptcha.start()
                                 command(f'{at()} ','yellow')
                                 command(' !! [CAPTCHA] !! ACTION REQUİRED','red')
                                 endcommand()
-                    
-                                if  not client.stopped:
+                                if checkvip and not client.stopped:
                                     client.stopped=True
-                                    if client.webhook['enable']:
-                                        webhookping()
-                                    return solvevip(m['attachments'][0]['url'], m['content'])
+
+                                    return solvevip(msgs[0]['attachments'][0]['url'], msgs[0]['content'])
                                 else:
                                     if not client.stopped:
                                         client.stopped=True
-                                        return solve(m['attachments'][0]['url'], m['content'])
+                                        if client.webhook['enable']:
+                                            webhookping()
+                                        return solve(msgs[0]['attachments'][0]['url'], msgs[0]['content'])
+                                return "captcha"
+                            else:
+                                if i == len(msgs) - 1:
+                                    client.stopped=True
+                                    return "captcha"
+                    if client.username in m['content'] and  '⚠' in m['content'].lower() and not client.stopped:
+
+                        if  m['attachments'] and not client.stopped:
                             threadcaptcha.start()
                             command(f'{at()} ','yellow')
                             command(' !! [CAPTCHA] !! ACTION REQUİRED','red')
-                            endcommand()                        
-                            return "captcha"                    
-    
+                            endcommand()
+                
+                            if  not client.stopped:
+                                client.stopped=True
+                                if client.webhook['enable']:
+                                    webhookping()
+                                return solvevip(m['attachments'][0]['url'], m['content'])
+                            else:
+                                if not client.stopped:
+                                    client.stopped=True
+                                    return solve(m['attachments'][0]['url'], m['content'])
+                        threadcaptcha.start()
+                        command(f'{at()} ','yellow')
+                        command(' !! [CAPTCHA] !! ACTION REQUİRED','red')
+                        endcommand()                        
+                        return "captcha"                    
+
         @bot.gateway.command
         def security(resp: object)-> None:
             threadcaptchamusic = threading.Thread(name="captchamusic", target=captchamusic)
@@ -1520,8 +1520,8 @@ def create_form(Form):
                 endcommand()
                 #subprocess.call(sys.executable + ' "' + os.path.realpath(__file__) + '"')  
                 client.stopped=False
-                if client.startloop:
-                    loopie()
+                
+                loopie()
                 #execl(executable, executable, *argv)
             if issuechecker(resp) == "captcha":
                 client.stopped = True
@@ -1534,27 +1534,27 @@ def create_form(Form):
         #Check balance Casino    
         @bot.gateway.command	
         def checkballance(resp): 
-            if client.startloop:             
-                if checkCasino():
-                    if client.checknocash == False and client.stopped != True:
-                        if resp.event.message:
-                            m = resp.parsed.auto()
-                            if m['channel_id'] == client.casino['channelcasinoid'] and client.stopped == False:
-                                if m['author']['id'] == client.OwOID and client.username in m['content'] and 'you currently have' in m['content']:
-                                    client.cash = findall('[0-9]+', m['content'])
-                                    casino(f'{at()} ','#b452cd')
-                                    casino(f"You currently have {','.join(client.cash[1::])} Cowoncy !","")
-                                    endcasino()
-                            if client.username in m['content'] and 'You don\'t have enough cowoncy!' in m['content']:
-                                casino('[ERROR]','red')
-                                casino('Not Enough Cowoncy To Continue!','')
-                                endcasino()                            
-                                client.checknocash = True
+                      
+            if checkCasino():
+                if client.checknocash == False and client.stopped != True:
+                    if resp.event.message:
+                        m = resp.parsed.auto()
+                        if m['channel_id'] == client.casino['channelcasinoid'] and client.stopped == False:
+                            if m['author']['id'] == client.OwOID and client.username in m['content'] and 'you currently have' in m['content']:
+                                client.cash = findall('[0-9]+', m['content'])
+                                casino(f'{at()} ','#b452cd')
+                                casino(f"You currently have {','.join(client.cash[1::])} Cowoncy !","")
+                                endcasino()
+                        if client.username in m['content'] and 'You don\'t have enough cowoncy!' in m['content']:
+                            casino('[ERROR]','red')
+                            casino('Not Enough Cowoncy To Continue!','')
+                            endcasino()                            
+                            client.checknocash = True
 
     # Gems
         @bot.gateway.command
         def checkgem(resp):
-            if client.gem['mode']==1 and client.stopped != True and client.startloop:
+            if client.gem['mode']==1 and client.stopped != True :
                 if resp.event.message:
                     m = resp.parsed.auto()
                     if m['channel_id'] == client.channel and client.stopped != True:
@@ -1573,7 +1573,7 @@ def create_form(Form):
         # Check Hunt
         @bot.gateway.command
         def checkhunt(resp):
-            if client.stopped != True and client.webhook['enable'] and client.startloop:
+            if client.stopped != True and client.webhook['enable'] :
                 if resp.event.message:
                     m = resp.parsed.auto()
                     
@@ -1655,13 +1655,13 @@ def create_form(Form):
                 if resp.event.message:
                     m = resp.parsed.auto()
                     
-                    if m['channel_id'] == client.dmsID and client.startloop:
+                    if m['channel_id'] == client.dmsID :
                         if m['author']['id'] == client.OwOID:
                             dms(f'{at()} '"#b452cd")
                             dms('OWO [BOT]:\n',"#8b0a50")
                             dms(f'{m["content"]}\n\n',"")
                             if client.checkcaptchafail==True:
-                                if ' I have verified' in m['content'] and client.startloop==True:
+                                if ' I have verified' in m['content'] :
                                     client.stopped=True
                                     client.checkcaptchafail=False
                                     loopie()
@@ -1827,7 +1827,7 @@ def create_form(Form):
 
         @bot.gateway.command
         def checkcf(resp):
-            if client.casino['enable'] and client.casino['cf']['enable'] and client.checknocash == False and client.stopped != True and client.startloop:
+            if client.casino['enable'] and client.casino['cf']['enable'] and client.checknocash == False and client.stopped != True :
                 if resp.event.message_updated:
                     m = resp.parsed.auto()
                     try:
@@ -1870,7 +1870,7 @@ def create_form(Form):
         @bot.gateway.command
         def checkos(resp):
         
-            if client.casino['enable'] and client.casino['os']['enable'] and client.checknocash == False and client.stopped != True and client.startloop:
+            if client.casino['enable'] and client.casino['os']['enable'] and client.checknocash == False and client.stopped != True:
                 if resp.event.message_updated:
                     m = resp.parsed.auto()
                     try:
@@ -2293,7 +2293,7 @@ def create_form(Form):
                     
         def loopie():
             	
-            client.startloop=True
+           
             comborunner = threading.Thread(name="threadrunner", target=threadrunner)
             combocasino = threading.Thread(name="threadcasino", target=threadcasino)
             combotime = threading.Thread(name="threadTime", target=threadTime)
